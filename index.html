@@ -338,18 +338,6 @@
 </div>
 
 <script>
-// PIN protection
-(function() {
-  const KEY = 'ts_calc_auth';
-  if (sessionStorage.getItem(KEY) !== 'ok') {
-    const pin = prompt('Enter PIN to access calculator:');
-    if (pin !== '1608') {
-      document.body.innerHTML = '<div style="text-align:center;padding:60px;font-family:Inter,sans-serif;color:#0f2b46"><h2>Access Denied</h2><p style="margin-top:8px;color:#9ca3af">Invalid PIN. Reload to try again.</p></div>';
-      return;
-    }
-    sessionStorage.setItem(KEY, 'ok');
-  }
-})();
 
 // ---- PRICING DATA ----
 const pricingData = {
