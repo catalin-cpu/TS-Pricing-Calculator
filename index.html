@@ -510,7 +510,7 @@ function calculate() {
 
     document.getElementById('label3').textContent = 'Per Property / Month';
     document.getElementById('val3').textContent   = fmt(perPropMonth, sym);
-    document.getElementById('sub3').textContent   = 'yearly \u00f7 12 \u00f7 ' + qty + ' props';
+    document.getElementById('sub3').textContent   = '';
   } else {
     const totalMonth   = calculatePrice(plan, 'monthly', qty, currency);
     const annualEquiv  = totalMonth * 12;
@@ -526,13 +526,10 @@ function calculate() {
 
     document.getElementById('label3').textContent = 'Per Property / Month';
     document.getElementById('val3').textContent   = fmt(perPropMonth, sym);
-    document.getElementById('sub3').textContent   = '\u00f7 ' + qty + ' properties';
+    document.getElementById('sub3').textContent   = '';
   }
 
-  const hint = document.getElementById('qtyHint');
-  hint.textContent = isExtrapolated
-    ? '\u26a0\ufe0f Extrapolated beyond ' + maxQty + ' properties'
-    : '';
+  document.getElementById('qtyHint').textContent = '';
 
   const planName    = plan.charAt(0).toUpperCase() + plan.slice(1);
   const billingLbl  = billing === 'yearly' ? 'yearly billing' : 'monthly billing';
