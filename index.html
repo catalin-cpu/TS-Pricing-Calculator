@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>TouchStay Billing Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2b46;
+    --teal: #0e7c7b;
+    --teal-lt: #14a8a7;
+    --sky: #e8f6f6;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-50);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 32px rgba(15,43,70,0.10);
+    width: 100%;
+    max-width: 800px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--navy);
+    padding: 28px 36px 24px;
+    color: white;
+  }
+  .card-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .card-header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+  }
+  .card-body { padding: 32px 36px; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .control-group { display: flex; flex-direction: column; gap: 8px; }
+  .control-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--gray-400);
+  }
+
+  .currency-select {
+    appearance: none;
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 36px 10px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239ca3af' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color 0.15s;
+  }
+  .currency-select:focus { outline: none; border-color: var(--teal); }
+
+  .pill-group {
+    display: flex;
+    background: var(--gray-100);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    height: 46px;
+  }
+  .pill-btn {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pill-btn.active {
+    background: white;
+    color: var(--navy);
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  .plan-group { display: flex; gap: 6px; height: 46px; }
+  .plan-btn {
+    flex: 1;
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    background: white;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .plan-btn:hover { border-color: var(--teal-lt); color: var(--teal); }
+  .plan-btn.active {
+    border-color: var(--teal);
+    background: var(--sky);
+    color: var(--teal);
+  }
+  .plan-btn.active.pro-active {
+    border-color: var(--navy);
+    background: #e8eef5;
+    color: var(--navy);
+  }
+
+  .qty-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .qty-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
+    white-space: nowrap;
+  }
+  .qty-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .qty-input-wrap:focus-within { border-color: var(--teal); }
+  .qty-input {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    width: 90px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .qty-input::-webkit-inner-spin-button,
+  .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .qty-input { -moz-appearance: textfield; }
+  .qty-input:focus { outline: none; }
+  .qty-btn {
+    border: none;
+    background: transparent;
+    width: 40px;
+    height: 46px;
+    font-size: 22px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .qty-btn:hover { background: var(--gray-100); color: var(--teal); }
+  .qty-hint {
+    font-size: 12px;
+    color: #f59e0b;
+    font-weight: 500;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--gray-100);
+    margin-bottom: 28px;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .result-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: 14px;
+    padding: 20px 20px 18px;
+  }
+  .result-card.primary {
+    background: var(--navy);
+    border-color: var(--navy);
+  }
+  .result-card.secondary {
+    background: var(--sky);
+    border-color: #c2e8e8;
+  }
+  .result-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+  }
+  .result-card.primary .result-label { color: rgba(255,255,255,0.55); }
+  .result-card.secondary .result-label { color: var(--teal); }
+  .result-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .result-card.primary .result-value { color: white; }
+  .result-card.secondary .result-value { color: var(--teal); }
+  .result-sub {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .result-card.primary .result-sub { color: rgba(255,255,255,0.45); }
+  .result-card.secondary .result-sub { color: var(--teal-lt); }
+
+  .calc-note {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--gray-400);
+    text-align: center;
+  }
+  .calc-note span { color: var(--teal); font-weight: 600; }
+
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .card-body { padding: 24px 16px; }
+    .controls { grid-template-columns: 1fr; }
+    .results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <h1>TouchStay Billing Calculator</h1>
+    <p>Select your plan, currency and billing cycle &mdash; enter property count to see your price</p>
+  </div>
+  <div class="card-body">
+
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Currency</span>
+        <select class="currency-select" id="currencySelect">
+          <option value="usd">$ USD &mdash; US Dollar</option>
+          <option value="gbp">&#163; GBP &mdash; British Pound</option>
+          <option value="eur">&#8364; EUR &mdash; Euro</option>
+          <option value="aud">A$ AUD &mdash; Australian Dollar</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Billing Cycle</span>
+        <div class="pill-group">
+          <button class="pill-btn" id="btnMonthly" onclick="setBilling('monthly')">Monthly</button>
+          <button class="pill-btn active" id="btnYearly" onclick="setBilling('yearly')">Yearly</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Plan</span>
+        <div class="plan-group">
+          <button class="plan-btn" id="planStarter" onclick="setPlan('starter')">Starter</button>
+          <button class="plan-btn active" id="planGrowth" onclick="setPlan('growth')">Growth</button>
+          <button class="plan-btn" id="planPro" onclick="setPlan('pro')">Pro</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="qty-row">
+      <span class="qty-label">Properties</span>
+      <div class="qty-input-wrap">
+        <button class="qty-btn" onclick="adjustQty(-1)">&#8722;</button>
+        <input class="qty-input" type="number" id="qtyInput" value="10" min="1" max="9999" oninput="calculate()">
+        <button class="qty-btn" onclick="adjustQty(1)">+</button>
+      </div>
+      <span class="qty-hint" id="qtyHint"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="results">
+      <div class="result-card primary">
+        <div class="result-label" id="label1">Total / Year</div>
+        <div class="result-value" id="val1">&mdash;</div>
+        <div class="result-sub" id="sub1"></div>
+      </div>
+      <div class="result-card secondary">
+        <div class="result-label" id="label2">Monthly Equivalent</div>
+        <div class="result-value" id="val2">&mdash;</div>
+        <div class="result-sub" id="sub2"></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label" id="label3">Per Property / Month</div>
+        <div class="result-value" id="val3">&mdash;</div>
+        <div class="result-sub" id="sub3"></div>
+      </div>
+    </div>
+
+    <div class="calc-note" id="calcNote"></div>
+
+  </div>
+</div>
+
+<script>
+// PIN protection
+(function() {
+  const KEY = 'ts_calc_auth';
+  if (sessionStorage.getItem(KEY) !== 'ok') {
+    const pin = prompt('Enter PIN to access calculator:');
+    if (pin !== '1608') {
+      document.body.innerHTML = '<div style="text-align:center;padding:60px;font-family:Inter,sans-serif;color:#0f2b46"><h2>Access Denied</h2><p style="margin-top:8px;color:#9ca3af">Invalid PIN. Reload to try again.</p></div>';
+      return;
+    }
+    sessionStorage.setItem(KEY, 'ok');
+  }
+})();
+
+// ---- PRICING DATA ----
+const pricingData = {
+  usd: {
+    starter: {
+      yearly: [99, 150, 195, 240, 285, 329, 372, 414, 455, 495, 530, 565, 600, 635, 670, 704, 738, 772, 806, 840, 873, 906, 939, 972, 1005, 1037, 1069, 1101, 1133, 1165, 1196, 1227, 1258, 1289, 1320, 1350, 1380, 1410, 1440, 1470, 1500, 1530, 1560, 1590, 1620, 1650, 1680, 1710, 1740, 1770, 1799, 1828, 1857, 1886, 1915, 1944, 1973, 2002, 2031, 2060, 2088, 2116, 2144, 2172, 2200, 2228, 2256, 2284, 2312, 2340, 2367, 2394, 2421, 2448, 2475, 2502, 2529, 2556, 2583, 2610, 2636, 2662, 2688, 2714, 2740, 2766, 2792, 2818, 2844, 2870],
+      monthly: [12.5, 17.6, 22.1, 26.6, 31.1, 35.5, 39.8, 44, 48.1, 52.1, 55.6, 59.1, 62.6, 66.1, 69.6, 73, 76.4, 79.8, 83.2, 86.6, 89.9, 93.2, 96.5, 99.8, 103.1, 106.3, 109.5, 112.7, 115.9, 119.1, 122.2, 125.3, 128.4, 131.5, 134.6, 137.6, 140.6, 143.6, 146.6, 149.6, 152.6, 155.6, 158.6, 161.6, 164.6, 167.6, 170.6, 173.6, 176.6, 179.6, 182.5, 185.4, 188.3, 191.2, 194.1, 197, 199.9, 202.8, 205.7, 208.6, 211.4, 214.2, 217, 219.8, 222.6, 225.4, 228.2, 231, 233.8, 236.6, 239.3, 242, 244.7, 247.4, 250.1, 252.8, 255.5, 258.2, 260.9, 263.6, 266.2, 268.8, 271.4, 274, 276.6, 279.2, 281.8, 284.4, 287, 289.6],
+    },
+    growth: {
+      yearly: [139, 244, 334, 414, 487, 555, 619, 680, 738, 793, 846, 897, 947, 995, 1042, 1088, 1133, 1177, 1220, 1262, 1303, 1343, 1383, 1422, 1460, 1498, 1535, 1572, 1608, 1644, 1679, 1714, 1748, 1782, 1816, 1849, 1882, 1914, 1946, 1978, 2009, 2040, 2071, 2102, 2132, 2162, 2192, 2222, 2251, 2280, 2309, 2338, 2366, 2394, 2422, 2450, 2478, 2505, 2532, 2559, 2586, 2613, 2640, 2666, 2692, 2718, 2744, 2770, 2796, 2821, 2846, 2871, 2896, 2921, 2946, 2971, 2995, 3019, 3043, 3067, 3091, 3115, 3139, 3163, 3187, 3210, 3233, 3256, 3279, 3302, 3325, 3348, 3371, 3394, 3416, 3438, 3460, 3482, 3504, 3526],
+      monthly: [15, 26.4, 36.1, 44.7, 52.6, 59.9, 66.8, 73.3, 79.5, 85.5, 91.2, 96.8, 102.2, 107.4, 112.5, 117.4, 122.2, 126.9, 131.5, 136, 140.4, 144.8, 149.1, 153.3, 157.4, 161.5, 165.5, 169.5, 173.4, 177.2, 181, 184.8, 188.5, 192.2, 195.8, 199.4, 202.9, 206.4, 209.9, 213.3, 216.7, 220.1, 223.4, 226.7, 230, 233.2, 236.4, 239.6, 242.8, 245.9, 249, 252.1, 255.2, 258.2, 261.2, 264.2, 267.2, 270.2, 273.1, 276, 278.9, 281.8, 284.7, 287.5, 290.3, 293.1, 295.9, 298.7, 301.5, 304.2, 306.9, 309.6, 312.3, 315, 317.7, 320.4, 323, 325.6, 328.2, 330.8, 333.4, 336, 338.6, 341.1, 343.6, 346.1, 348.6, 351.1, 353.6, 356.1, 358.6, 361.1, 363.5, 365.9, 368.3, 370.7, 373.1, 375.5, 377.9, 380.3],
+    },
+    pro: {
+      yearly: [159, 279, 381, 472, 556, 634, 707, 776, 842, 905, 966, 1025, 1082, 1137, 1191, 1243, 1294, 1344, 1393, 1441, 1488, 1534, 1579, 1624, 1668, 1711, 1754, 1796, 1837, 1878, 1918, 1958, 1997, 2036, 2074, 2112, 2150, 2187, 2224, 2260, 2296, 2332, 2367, 2402, 2437, 2471, 2505, 2539, 2573, 2606, 2639, 2672, 2704, 2736, 2768, 2800, 2832, 2863, 2894, 2925, 2956, 2987, 3017, 3047, 3077, 3107, 3137, 3166, 3195, 3224, 3253, 3282, 3311, 3339, 3367, 3395, 3423, 3451, 3479, 3507, 3534, 3561, 3588, 3615, 3642, 3669, 3696, 3723, 3749, 3775, 3801, 3827, 3853, 3879, 3905, 3931, 3957, 3982, 4007, 4032],
+      monthly: [18, 31.6, 43.2, 53.5, 63, 71.8, 80.1, 87.9, 95.4, 102.6, 109.5, 116.2, 122.7, 129, 135.1, 141, 146.8, 152.5, 158, 163.4, 168.7, 173.9, 179, 184, 189, 193.9, 198.7, 203.4, 208.1, 212.7, 217.3, 221.8, 226.2, 230.6, 234.9, 239.2, 243.4, 247.6, 251.8, 255.9, 260, 264, 268, 272, 275.9, 279.8, 283.7, 287.5, 291.3, 295.1, 298.8, 302.5, 306.2, 309.9, 313.5, 317.1, 320.7, 324.2, 327.7, 331.2, 334.7, 338.2, 341.6, 345, 348.4, 351.8, 355.1, 358.4, 361.7, 365, 368.3, 371.6, 374.8, 378, 381.2, 384.4, 387.6, 390.8, 393.9, 397, 400.1, 403.2, 406.3, 409.4, 412.4, 415.4, 418.4, 421.4, 424.4, 427.4, 430.4, 433.3, 436.2, 439.1, 442, 444.9, 447.8, 450.7, 453.6, 456.5],
+    },
+  },
+  gbp: {
+    starter: {
+      yearly: [73.0, 111.0, 144.0, 177.0, 210.0, 243.0, 275.0, 306.0, 336.0, 366.0, 392.0, 418.0, 444.0, 470.0, 496.0, 521.0, 546.0, 571.0, 596.0, 621.0, 645.0, 669.0, 693.0, 717.0, 741.0, 765.0, 789.0, 813.0, 837.0, 861.0, 884.0, 907.0, 930.0, 953.0, 976.0, 998.0, 1020.0, 1042.0, 1064.0, 1086.0, 1108.0, 1130.0, 1152.0, 1174.0, 1196.0, 1218.0, 1240.0, 1262.0, 1284.0, 1306.0, 1327.0, 1348.0, 1369.0, 1390.0, 1411.0, 1432.0, 1453.0, 1474.0, 1495.0, 1516.0, 1537.0, 1558.0, 1579.0, 1600.0, 1621.0, 1642.0, 1663.0, 1684.0, 1705.0, 1726.0, 1746.0, 1766.0, 1786.0, 1806.0, 1826.0, 1846.0, 1866.0, 1886.0, 1906.0, 1926.0, 1945.0, 1964.0, 1983.0, 2002.0, 2021.0, 2040.0, 2059.0, 2078.0, 2097.0, 2116.0],
+      monthly: [9.3, 13.1, 16.4, 19.7, 23.0, 26.3, 29.5, 32.6, 35.6, 38.6, 41.2, 43.8, 46.4, 49.0, 51.6, 54.1, 56.6, 59.1, 61.6, 64.1, 66.5, 68.9, 71.3, 73.7, 76.1, 78.5, 80.9, 83.3, 85.7, 88.1, 90.4, 92.7, 95.0, 97.3, 99.6, 101.8, 104.0, 106.2, 108.4, 110.6, 112.8, 115.0, 117.2, 119.4, 121.6, 123.8, 126.0, 128.2, 130.4, 132.6, 134.7, 136.8, 138.9, 141.0, 143.1, 145.2, 147.3, 149.4, 151.5, 153.6, 155.7, 157.8, 159.9, 162.0, 164.1, 166.2, 168.3, 170.4, 172.5, 174.6, 176.6, 178.6, 180.6, 182.6, 184.6, 186.6, 188.6, 190.6, 192.6, 194.6, 196.5, 198.4, 200.3, 202.2, 204.1, 206.0, 207.9, 209.8, 211.7, 213.6],
+    },
+    growth: {
+      yearly: [103.0, 181.0, 248.0, 307.0, 361.0, 411.0, 458.0, 503.0, 546.0, 587.0, 626.0, 664.0, 701.0, 737.0, 772.0, 806.0, 839.0, 872.0, 904.0, 935.0, 965.0, 995.0, 1025.0, 1054.0, 1082.0, 1110.0, 1137.0, 1164.0, 1191.0, 1218.0, 1244.0, 1270.0, 1295.0, 1320.0, 1345.0, 1369.0, 1393.0, 1417.0, 1441.0, 1465.0, 1488.0, 1511.0, 1534.0, 1557.0, 1579.0, 1601.0, 1623.0, 1645.0, 1666.0, 1687.0, 1708.0, 1729.0, 1750.0, 1771.0, 1792.0, 1813.0, 1834.0, 1854.0, 1874.0, 1894.0, 1914.0, 1934.0, 1954.0, 1973.0, 1992.0, 2011.0, 2030.0, 2049.0, 2068.0, 2087.0, 2106.0, 2125.0, 2144.0, 2163.0, 2182.0, 2201.0, 2219.0, 2237.0, 2255.0, 2273.0, 2291.0, 2309.0, 2327.0, 2345.0, 2363.0, 2380.0, 2397.0, 2414.0, 2431.0, 2448.0, 2465.0, 2482.0, 2499.0, 2516.0, 2532.0, 2548.0, 2564.0, 2580.0, 2596.0, 2612.0],
+      monthly: [11.1, 19.1, 26.1, 32.1, 38.1, 43.1, 48.1, 53.1, 58.1, 62.1, 66.1, 70.1, 74.1, 78.1, 82.1, 86.1, 90.1, 93.1, 96.1, 99.1, 102.1, 105.1, 108.1, 111.1, 114.1, 117.1, 120.1, 123.1, 126.1, 129.1, 132.1, 135.1, 138.1, 141.1, 144.1, 147.1, 150.1, 153.1, 156.1, 159.1, 162.1, 165.1, 167.1, 169.1, 171.1, 173.1, 175.1, 177.1, 179.1, 181.1, 183.1, 185.1, 187.1, 189.1, 191.1, 193.1, 195.1, 197.1, 199.1, 201.1, 203.1, 205.1, 207.1, 209.1, 211.1, 213.1, 215.1, 217.1, 219.1, 221.1, 223.1, 225.1, 227.1, 229.1, 231.1, 233.1, 235.1, 237.1, 239.1, 241.1, 243.1, 245.1, 247.1, 249.1, 251.1, 253.1, 255.1, 257.1, 259.1, 261.1, 263.1, 265.1, 267.1, 269.1, 271.1, 273.1, 275.1, 277.1, 279.1, 281.1],
+    },
+    pro: {
+      yearly: [118.0, 207.0, 283.0, 350.0, 412.0, 470.0, 524.0, 575.0, 624.0, 671.0, 716.0, 760.0, 802.0, 843.0, 883.0, 922.0, 960.0, 997.0, 1033.0, 1069.0, 1104.0, 1138.0, 1171.0, 1204.0, 1237.0, 1269.0, 1301.0, 1332.0, 1362.0, 1392.0, 1422.0, 1452.0, 1481.0, 1510.0, 1538.0, 1566.0, 1594.0, 1621.0, 1648.0, 1675.0, 1702.0, 1729.0, 1755.0, 1781.0, 1807.0, 1832.0, 1857.0, 1882.0, 1907.0, 1931.0, 1955.0, 1979.0, 2003.0, 2027.0, 2051.0, 2075.0, 2099.0, 2122.0, 2145.0, 2168.0, 2191.0, 2214.0, 2236.0, 2258.0, 2280.0, 2302.0, 2324.0, 2345.0, 2366.0, 2387.0, 2408.0, 2429.0, 2450.0, 2471.0, 2492.0, 2513.0, 2534.0, 2555.0, 2576.0, 2597.0, 2617.0, 2637.0, 2657.0, 2677.0, 2697.0, 2717.0, 2737.0, 2757.0, 2776.0, 2795.0, 2814.0, 2833.0, 2852.0, 2871.0, 2890.0, 2909.0, 2928.0, 2947.0, 2966.0, 2985.0],
+      monthly: [13.3, 23.3, 32.3, 40.3, 47.3, 54.3, 60.3, 66.3, 72.3, 77.3, 82.3, 87.3, 92.3, 97.3, 102.3, 106.3, 110.3, 114.3, 118.3, 122.3, 126.3, 130.3, 134.3, 138.3, 142.3, 146.3, 150.3, 153.3, 156.3, 159.3, 162.3, 165.3, 168.3, 171.3, 174.3, 177.3, 180.3, 183.3, 186.3, 189.3, 192.3, 195.3, 198.3, 201.3, 204.3, 207.3, 210.3, 213.3, 216.3, 219.3, 222.3, 225.3, 228.3, 231.3, 234.3, 237.3, 240.3, 243.3, 246.3, 249.3, 252.3, 255.3, 258.3, 261.3, 264.3, 267.3, 269.3, 271.3, 273.3, 275.3, 277.3, 279.3, 281.3, 283.3, 285.3, 287.3, 289.3, 291.3, 293.3, 295.3, 297.3, 299.3, 301.3, 303.3, 305.3, 307.3, 309.3, 311.3, 313.3, 315.3, 317.3, 319.3, 321.3, 323.3, 325.3, 327.3, 329.3, 331.3, 333.3, 335.3],
+    },
+  },
+  eur: {
+    starter: {
+      yearly: [85, 129, 167, 205, 243, 281, 318, 354, 389, 423, 453, 483, 513, 543, 573, 602, 631, 660, 689, 718, 746, 774, 802, 830, 858, 885, 912, 939, 966, 993, 1019, 1045, 1071, 1097, 1123, 1149, 1175, 1201, 1227, 1253, 1279, 1305, 1331, 1357, 1383, 1409, 1435, 1461, 1487, 1513, 1538, 1563, 1588, 1613, 1638, 1663, 1688, 1713, 1738, 1763, 1787, 1811, 1835, 1859, 1883, 1907, 1931, 1955, 1979, 2003, 2026, 2049, 2072, 2095, 2118, 2141, 2164, 2187, 2210, 2233, 2255, 2277, 2299, 2321, 2343, 2365, 2387, 2409, 2431, 2453],
+      monthly: [10.7, 15.1, 18.9, 22.7, 26.5, 30.3, 34, 37.6, 41.1, 44.5, 47.5, 50.5, 53.5, 56.5, 59.5, 62.4, 65.3, 68.2, 71.1, 74, 76.8, 79.6, 82.4, 85.2, 88, 90.7, 93.4, 96.1, 98.8, 101.5, 104.1, 106.7, 109.3, 111.9, 114.5, 117.1, 119.7, 122.3, 124.9, 127.5, 130.1, 132.7, 135.3, 137.9, 140.5, 143.1, 145.7, 148.3, 150.9, 153.5, 156, 158.5, 161, 163.5, 166, 168.5, 171, 173.5, 176, 178.5, 180.9, 183.3, 185.7, 188.1, 190.5, 192.9, 195.3, 197.7, 200.1, 202.5, 204.8, 207.1, 209.4, 211.7, 214, 216.3, 218.6, 220.9, 223.2, 225.5, 227.7, 229.9, 232.1, 234.3, 236.5, 238.7, 240.9, 243.1, 245.3, 247.5],
+    },
+    growth: {
+      yearly: [119, 209, 286, 354, 416, 474, 529, 581, 631, 678, 723, 767, 810, 851, 891, 930, 968, 1006, 1043, 1079, 1114, 1148, 1182, 1215, 1247, 1279, 1311, 1343, 1374, 1405, 1435, 1465, 1494, 1523, 1552, 1580, 1608, 1635, 1662, 1689, 1715, 1741, 1767, 1793, 1819, 1845, 1871, 1897, 1922, 1947, 1972, 1997, 2021, 2045, 2069, 2093, 2117, 2140, 2163, 2186, 2209, 2232, 2255, 2277, 2299, 2321, 2343, 2365, 2387, 2408, 2429, 2450, 2471, 2492, 2513, 2534, 2555, 2576, 2597, 2618, 2639, 2660, 2681, 2702, 2723, 2743, 2763, 2783, 2803, 2823, 2843, 2863, 2883, 2903, 2922, 2941, 2960, 2979, 2998, 3017],
+      monthly: [12.8, 22.5, 30.8, 38.2, 45, 51.2, 57.1, 62.7, 68, 73.1, 78, 82.8, 87.4, 91.8, 96.2, 100.4, 104.5, 108.5, 112.4, 116.2, 120, 123.8, 127.5, 131.1, 134.6, 138.1, 141.5, 144.9, 148.2, 151.4, 154.6, 157.8, 161, 164.2, 167.3, 170.4, 173.4, 176.4, 179.4, 182.3, 185.2, 188.1, 190.9, 193.7, 196.5, 199.2, 201.9, 204.6, 207.3, 209.9, 212.5, 215.1, 217.7, 220.3, 222.9, 225.5, 228.1, 230.7, 233.2, 235.7, 238.2, 240.7, 243.2, 245.6, 248, 250.4, 252.8, 255.2, 257.6, 259.9, 262.2, 264.5, 266.8, 269.1, 271.4, 273.7, 275.9, 278.1, 280.3, 282.5, 284.7, 286.9, 289.1, 291.2, 293.3, 295.4, 297.5, 299.6, 301.7, 303.8, 305.9, 308, 310.1, 312.2, 314.3, 316.4, 318.5, 320.6, 322.7, 324.8],
+    },
+    pro: {
+      yearly: [136, 239, 326, 404, 476, 543, 605, 664, 720, 774, 826, 876, 925, 972, 1018, 1062, 1106, 1149, 1191, 1232, 1272, 1311, 1349, 1387, 1425, 1462, 1499, 1535, 1570, 1605, 1639, 1673, 1706, 1739, 1771, 1803, 1835, 1867, 1899, 1930, 1961, 1992, 2022, 2052, 2082, 2111, 2140, 2169, 2198, 2226, 2254, 2282, 2309, 2336, 2363, 2390, 2417, 2443, 2469, 2495, 2521, 2547, 2573, 2599, 2625, 2651, 2677, 2702, 2727, 2752, 2777, 2802, 2827, 2851, 2875, 2899, 2923, 2947, 2971, 2995, 3018, 3041, 3064, 3087, 3110, 3133, 3156, 3179, 3201, 3223, 3245, 3267, 3289, 3311, 3333, 3355, 3377, 3398, 3419, 3440],
+      monthly: [15.4, 27, 36.9, 45.7, 53.8, 61.3, 68.4, 75.1, 81.5, 87.7, 93.6, 99.3, 104.9, 110.3, 115.5, 120.5, 125.5, 130.4, 135.1, 139.7, 144.2, 148.6, 153, 157.3, 161.6, 165.8, 169.9, 173.9, 177.9, 181.8, 185.7, 189.5, 193.3, 197.1, 200.8, 204.5, 208.1, 211.7, 215.3, 218.8, 222.3, 225.7, 229.1, 232.5, 235.8, 239.1, 242.4, 245.6, 248.8, 252, 255.2, 258.4, 261.6, 264.8, 267.9, 271, 274.1, 277.1, 280.1, 283.1, 286.1, 289.1, 292, 294.9, 297.8, 300.7, 303.5, 306.3, 309.1, 311.9, 314.7, 317.5, 320.2, 322.9, 325.6, 328.3, 331, 333.7, 336.3, 338.9, 341.5, 344.1, 346.7, 349.3, 351.9, 354.5, 357.1, 359.7, 362.3, 364.9, 367.5, 370, 372.5, 375, 377.5, 380, 382.5, 385, 387.5, 390],
+    },
+  },
+  aud: {
+    starter: {
+      yearly: [148, 224, 291, 358, 425, 491, 555, 618, 679, 739, 791, 843, 895, 947, 999, 1050, 1101, 1152, 1203, 1254, 1303, 1352, 1401, 1450, 1499, 1547, 1595, 1643, 1691, 1739, 1785, 1831, 1877, 1923, 1969, 2014, 2059, 2104, 2149, 2194, 2239, 2284, 2329, 2374, 2419, 2464, 2509, 2554, 2599, 2644, 2687, 2730, 2773, 2816, 2859, 2902, 2945, 2988, 3031, 3074, 3116, 3158, 3200, 3242, 3284, 3326, 3368, 3410, 3452, 3494, 3534, 3574, 3614, 3654, 3694, 3734, 3774, 3814, 3854, 3894, 3933, 3972, 4011, 4050, 4089, 4128, 4167, 4206, 4245, 4284],
+      monthly: [18.7, 26.3, 33, 39.7, 46.4, 53, 59.4, 65.7, 71.8, 77.8, 83, 88.2, 93.4, 98.6, 103.8, 108.9, 114, 119.1, 124.2, 129.3, 134.2, 139.1, 144, 148.9, 153.8, 158.6, 163.4, 168.2, 173, 177.8, 182.4, 187, 191.6, 196.2, 200.8, 205.3, 209.8, 214.3, 218.8, 223.3, 227.8, 232.3, 236.8, 241.3, 245.8, 250.3, 254.8, 259.3, 263.8, 268.3, 272.6, 276.9, 281.2, 285.5, 289.8, 294.1, 298.4, 302.7, 307, 311.3, 315.5, 319.7, 323.9, 328.1, 332.3, 336.5, 340.7, 344.9, 349.1, 353.3, 357.3, 361.3, 365.3, 369.3, 373.3, 377.3, 381.3, 385.3, 389.3, 393.3, 397.2, 401.1, 405, 408.9, 412.8, 416.7, 420.6, 424.5, 428.4, 432.3],
+    },
+    growth: {
+      yearly: [207, 364, 498, 617, 726, 827, 923, 1014, 1101, 1183, 1262, 1338, 1413, 1485, 1555, 1624, 1691, 1757, 1821, 1884, 1945, 2005, 2065, 2123, 2180, 2237, 2292, 2347, 2401, 2455, 2507, 2559, 2610, 2661, 2712, 2761, 2810, 2858, 2906, 2954, 3000, 3046, 3092, 3138, 3183, 3228, 3273, 3318, 3361, 3404, 3447, 3490, 3532, 3574, 3616, 3658, 3700, 3740, 3780, 3820, 3860, 3900, 3940, 3979, 4018, 4057, 4096, 4135, 4174, 4211, 4248, 4285, 4322, 4359, 4396, 4433, 4469, 4505, 4541, 4577, 4613, 4649, 4685, 4721, 4757, 4791, 4825, 4859, 4893, 4927, 4961, 4995, 5029, 5063, 5096, 5129, 5162, 5195, 5228, 5261],
+      monthly: [22.4, 39.4, 53.9, 66.7, 78.5, 89.4, 99.7, 109.4, 118.7, 127.7, 136.2, 144.6, 152.7, 160.5, 168.1, 175.4, 182.6, 189.6, 196.5, 203.2, 209.8, 216.4, 222.8, 229.1, 235.2, 241.3, 247.3, 253.3, 259.1, 264.8, 270.5, 276.2, 281.7, 287.2, 292.6, 298, 303.2, 308.4, 313.6, 318.7, 323.8, 328.9, 333.8, 338.7, 343.6, 348.4, 353.2, 358, 362.8, 367.4, 372, 376.6, 381.2, 385.7, 390.2, 394.7, 399.2, 403.7, 408, 412.3, 416.6, 420.9, 425.2, 429.4, 433.6, 437.8, 442, 446.2, 450.4, 454.4, 458.4, 462.4, 466.4, 470.4, 474.4, 478.4, 482.3, 486.2, 490.1, 494, 497.9, 501.8, 505.7, 509.4, 513.1, 516.8, 520.5, 524.2, 527.9, 531.6, 535.3, 539, 542.6, 546.2, 549.8, 553.4, 557, 560.6, 564.2, 567.8],
+    },
+    pro: {
+      yearly: [237, 416, 568, 704, 829, 945, 1054, 1157, 1256, 1350, 1441, 1529, 1614, 1696, 1777, 1855, 1931, 2006, 2079, 2151, 2221, 2290, 2357, 2424, 2490, 2554, 2618, 2681, 2742, 2803, 2863, 2923, 2981, 3039, 3096, 3153, 3210, 3265, 3320, 3374, 3428, 3482, 3534, 3586, 3638, 3689, 3740, 3791, 3842, 3891, 3940, 3989, 4037, 4085, 4133, 4181, 4229, 4275, 4321, 4367, 4413, 4459, 4504, 4549, 4594, 4639, 4684, 4727, 4770, 4813, 4856, 4899, 4942, 4984, 5026, 5068, 5110, 5152, 5194, 5236, 5276, 5316, 5356, 5396, 5436, 5476, 5516, 5556, 5595, 5634, 5673, 5712, 5751, 5790, 5829, 5868, 5907, 5944, 5981, 6018],
+      monthly: [26.9, 47.2, 64.5, 79.9, 94.1, 107.2, 119.6, 131.2, 142.4, 153.1, 163.4, 173.4, 183.1, 192.5, 201.6, 210.4, 219.1, 227.6, 235.8, 243.9, 251.8, 259.6, 267.2, 274.7, 282.2, 289.5, 296.7, 303.7, 310.7, 317.6, 324.5, 331.2, 337.8, 344.4, 350.8, 357.2, 363.5, 369.8, 376.1, 382.2, 388.3, 394.3, 400.3, 406.3, 412.1, 417.9, 423.7, 429.4, 435.1, 440.8, 446.3, 451.8, 457.3, 462.8, 468.2, 473.6, 479, 484.2, 489.4, 494.6, 499.8, 505, 510.1, 515.2, 520.3, 525.4, 530.3, 535.2, 540.1, 545, 549.9, 554.8, 559.6, 564.4, 569.2, 574, 578.8, 583.6, 588.2, 592.8, 597.4, 602, 606.6, 611.2, 615.7, 620.2, 624.7, 629.2, 633.7, 638.2, 642.7, 647, 651.3, 655.6, 659.9, 664.2, 668.5, 672.8, 677.1, 681.4],
+    },
+  },
+};
+
+// Extrapolation rates per additional property beyond table max
+const extrapolationRates = {
+  usd: {
+    starter: { yearly: 26.0, monthly: 2.6 },
+    growth:  { yearly: 22.0, monthly: 2.4 },
+    pro:     { yearly: 25.0, monthly: 2.9 }
+  },
+  gbp: {
+    starter: { yearly: 19.0, monthly: 1.9 },
+    growth:  { yearly: 16.0, monthly: 2.0 },
+    pro:     { yearly: 19.0, monthly: 2.0 }
+  },
+  eur: {
+    starter: { yearly: 22.0, monthly: 2.2 },
+    growth:  { yearly: 19.0, monthly: 2.1 },
+    pro:     { yearly: 21.0, monthly: 2.5 }
+  },
+  aud: {
+    starter: { yearly: 39.0, monthly: 3.9 },
+    growth:  { yearly: 33.0, monthly: 3.6 },
+    pro:     { yearly: 37.0, monthly: 4.3 }
+  }
+};
+
+const currencySymbols = { usd: '$', gbp: '\u00a3', eur: '\u20ac', aud: 'A$' };
+const currencyLabels  = { usd: 'USD', gbp: 'GBP', eur: 'EUR', aud: 'AUD' };
+
+let billing  = 'yearly';
+let plan     = 'growth';
+let currency = 'usd';
+
+function calculatePrice(p, bt, qty, cur) {
+  if (qty <= 0) return 0;
+  const table  = pricingData[cur][p][bt];
+  const maxQty = table.length;
+  if (qty <= maxQty) return table[qty - 1];
+  const rate = extrapolationRates[cur][p][bt];
+  return table[maxQty - 1] + (qty - maxQty) * rate;
+}
+
+function fmt(val, sym) {
+  const n = Math.round(val * 100) / 100;
+  if (n >= 10000) return sym + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (n >= 1000)  return sym + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  return sym + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function setBilling(b) {
+  billing = b;
+  document.getElementById('btnMonthly').classList.toggle('active', b === 'monthly');
+  document.getElementById('btnYearly').classList.toggle('active', b === 'yearly');
+  calculate();
+}
+
+function setPlan(p) {
+  plan = p;
+  ['Starter','Growth','Pro'].forEach(function(n) {
+    const btn = document.getElementById('plan' + n);
+    btn.classList.remove('active','pro-active');
+  });
+  const activeBtn = document.getElementById('plan' + p.charAt(0).toUpperCase() + p.slice(1));
+  activeBtn.classList.add('active');
+  if (p === 'pro') activeBtn.classList.add('pro-active');
+  calculate();
+}
+
+document.getElementById('currencySelect').addEventListener('change', function() {
+  currency = this.value;
+  calculate();
+});
+
+function adjustQty(delta) {
+  const input = document.getElementById('qtyInput');
+  const newVal = Math.max(1, (parseInt(input.value) || 1) + delta);
+  input.value = newVal;
+  calculate();
+}
+
+function calculate() {
+  const qty = Math.max(1, parseInt(document.getElementById('qtyInput').value) || 1);
+  const sym = currencySymbols[currency];
+  const maxQty = plan === 'starter' ? 90 : 100;
+  const isExtrapolated = qty > maxQty;
+
+  if (billing === 'yearly') {
+    const totalYear    = calculatePrice(plan, 'yearly', qty, currency);
+    const monthlyEquiv = totalYear / 12;
+    const perPropMonth = monthlyEquiv / qty;
+
+    document.getElementById('label1').textContent = 'Total / Year';
+    document.getElementById('val1').textContent   = fmt(totalYear, sym);
+    document.getElementById('sub1').textContent   = 'billed annually';
+
+    document.getElementById('label2').textContent = 'Monthly Equivalent';
+    document.getElementById('val2').textContent   = fmt(monthlyEquiv, sym);
+    document.getElementById('sub2').textContent   = 'yearly \u00f7 12';
+
+    document.getElementById('label3').textContent = 'Per Property / Month';
+    document.getElementById('val3').textContent   = fmt(perPropMonth, sym);
+    document.getElementById('sub3').textContent   = 'yearly \u00f7 12 \u00f7 ' + qty + ' props';
+  } else {
+    const totalMonth   = calculatePrice(plan, 'monthly', qty, currency);
+    const annualEquiv  = totalMonth * 12;
+    const perPropMonth = totalMonth / qty;
+
+    document.getElementById('label1').textContent = 'Total / Month';
+    document.getElementById('val1').textContent   = fmt(totalMonth, sym);
+    document.getElementById('sub1').textContent   = 'billed monthly';
+
+    document.getElementById('label2').textContent = 'Annual Equivalent';
+    document.getElementById('val2').textContent   = fmt(annualEquiv, sym);
+    document.getElementById('sub2').textContent   = 'monthly \u00d7 12';
+
+    document.getElementById('label3').textContent = 'Per Property / Month';
+    document.getElementById('val3').textContent   = fmt(perPropMonth, sym);
+    document.getElementById('sub3').textContent   = '\u00f7 ' + qty + ' properties';
+  }
+
+  const hint = document.getElementById('qtyHint');
+  hint.textContent = isExtrapolated
+    ? '\u26a0\ufe0f Extrapolated beyond ' + maxQty + ' properties'
+    : '';
+
+  const planName    = plan.charAt(0).toUpperCase() + plan.slice(1);
+  const billingLbl  = billing === 'yearly' ? 'yearly billing' : 'monthly billing';
+  document.getElementById('calcNote').innerHTML =
+    '<span>' + qty + ' propert' + (qty === 1 ? 'y' : 'ies') + '</span> &middot; ' +
+    '<span>' + planName + ' plan</span> &middot; ' +
+    '<span>' + billingLbl + '</span> &middot; ' +
+    '<span>' + currencyLabels[currency] + '</span>';
+}
+
+calculate();
+</script>
+</body>
+</html>
